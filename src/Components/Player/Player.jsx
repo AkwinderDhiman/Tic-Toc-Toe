@@ -1,15 +1,22 @@
 import { useState } from "react";
 import "./Player.css";
 
-export default function Player({ initialName, symbol, isActive }) {
+export default function Player({
+  initialName,
+  symbol,
+  isActive,
+  onChangeName,
+}) {
   const [playerName, setPlayerName] = useState(initialName);
   const [isEditing, setIsEditing] = useState(false);
 
   // Toggles edit mode
   function onEditPlayerName() {
-    console.log("setIsEditing", isEditing);
     // setIsEditing(!isEditing);
     setIsEditing((editing) => !editing);
+    if (isEditing) {
+      onChangeName(symbol, playerName);
+    }
   }
 
   // Updates playerName from input field
