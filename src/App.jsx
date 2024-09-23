@@ -11,6 +11,7 @@ const initialGameBoard = [
   [null, null, null],
 ];
 
+// Helper to determine active player based on turn history
 function deriveActivePlayer(gameTurns) {
   let currentPlayer = "X";
   if (gameTurns.length > 0 && gameTurns[0].player === "X") {
@@ -19,22 +20,8 @@ function deriveActivePlayer(gameTurns) {
   return currentPlayer;
 }
 
-function App() {
-  const [playerName, setPlayerName] = useState({
-    X: "Player 1",
-    O: "Player 2",
-  });
-  const [gameTurns, setGameTurn] = useState([]);
-  const activePlayer = deriveActivePlayer(gameTurns);
-
-  let gameBoard = [...initialGameBoard.map((array) => [...array])];
-  for (const turn of gameTurns) {
-    const { square, player } = turn;
-    const { row, col } = square;
-    gameBoard[row][col] = player;
-  }
-
-  let winner;
+// Helper to determine if there's a winner
+function checkWinner(gameBoard, playerName) {
   for (const combination of WINNING_COMBINATIONS) {
     let firstSquareSymbol =
       gameBoard[combination[0].row][combination[0].column];
@@ -48,11 +35,35 @@ function App() {
       firstSquareSymbol === secondSquareSymbol &&
       firstSquareSymbol === thirdSquareSymbol
     ) {
-      winner = playerName[firstSquareSymbol];
+      return playerName[firstSquareSymbol];
     }
   }
-  let gameDraw = gameTurns.length === 9 && !winner;
+  return null;
+}
 
+// Helper to generate the game board state from turns
+function generateGameBoard(gameTurns) {
+  const board = [...initialGameBoard.map((array) => [...array])];
+  for (const turn of gameTurns) {
+    const { square, player } = turn;
+    const { row, col } = square;
+    board[row][col] = player;
+  }
+  return board;
+}
+
+function App() {
+  const [playerName, setPlayerName] = useState({
+    X: "Player 1",
+    O: "Player 2",
+  });
+  const [gameTurns, setGameTurn] = useState([]);
+  const activePlayer = deriveActivePlayer(gameTurns);
+  const gameBoard = generateGameBoard(gameTurns);
+  const winner = checkWinner(gameBoard, playerName);
+  const gameDraw = gameTurns.length === 9 && !winner;
+
+  // Handle player name changes
   function handleSelectSquare(rowIndex, colIndex) {
     // setActivePlayer((currentPlayer) => (currentPlayer === "X" ? "O" : "X"));
     setGameTurn((prevTurn) => {
@@ -65,10 +76,12 @@ function App() {
     });
   }
 
+  // Handle game rematch
   function handleRematch() {
     setGameTurn([]);
   }
 
+  // Handle player name changes
   function handlePlayerNameChange(symbol, newName) {
     setPlayerName((prevPlayer) => {
       return {
@@ -77,7 +90,7 @@ function App() {
       };
     });
   }
-  
+
   return (
     <main>
       <header>
